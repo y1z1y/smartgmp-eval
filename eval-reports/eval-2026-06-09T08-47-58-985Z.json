@@ -1,0 +1,93 @@
+{
+  "timestamp": "2026-06-09T08:47:58.985Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": true,
+        "routePrecision": 1,
+        "redundantAgents": [],
+        "actualAgent": "ops-agent, gmp-dev-agent",
+        "toolSelectedCorrectly": true,
+        "toolPrecision": 0.5,
+        "redundantTools": [
+          "ask_user_question"
+        ],
+        "actualTools": [
+          "mcp__smartgmp__pradox_cookie_save",
+          "mcp__smartgmp__basic_config",
+          "mcp__smartgmp__new_generate_page",
+          "ask_user_question"
+        ],
+        "score": 70
+      },
+      "quality": {
+        "compilePassed": false,
+        "runtimeOk": null,
+        "componentsMatched": false,
+        "failedComponents": [],
+        "installCompleted": false,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "index.tsx",
+          "sdk-setup.ts",
+          "app-bootstrap.tsx",
+          "page-component-props.ts",
+          "page-stage.css"
+        ],
+        "score": 0
+      },
+      "duration": {
+        "totalMs": 140768,
+        "intentMs": 55768,
+        "toolMs": 85000,
+        "totalGrade": "pass",
+        "score": 35
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 1629,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780994793982
+        },
+        {
+          "tool": "mcp__smartgmp__pradox_cookie_save",
+          "agent": "ops-agent",
+          "ts": 1780994818776
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780994822599
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780994837990
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780994854732
+        },
+        {
+          "tool": "ask_user_question",
+          "agent": "orchestrator",
+          "ts": 1780994878981
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 70,
+  "avgQualityScore": 0,
+  "avgTotalMs": 140768,
+  "overallDurationGrade": "pass"
+}

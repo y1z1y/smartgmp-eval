@@ -1,0 +1,103 @@
+{
+    "id": "count-down",
+    "name": "活动倒计时组件",
+    "version": "1.0.0",
+    "description": "活动页倒计时组件，展示距离活动结束剩余天数，迁移自 mf-count-down",
+    "previewUrl": "https://ut-static.udache.com/webx/yingkesong/hCt0KuIn79yKu2Vs1bJlw.webp",
+    "category": "marketing",
+    "tags": [
+        "倒计时",
+        "活动",
+        "时间",
+        "营销"
+    ],
+    "import": {
+        "package": "@smartgmp-components/count-down",
+        "exportName": "default",
+        "type": "React.ComponentType<CountDownProps>"
+    },
+    "props": {
+        "textColor": {
+            "type": "string",
+            "required": false,
+            "description": "字体颜色",
+            "default": "#FFFFFF",
+            "category": "样式配置"
+        },
+        "bgColor": {
+            "type": "string",
+            "required": false,
+            "description": "背景色",
+            "default": "rgba(44,45,47,0.5)",
+            "category": "样式配置"
+        },
+        "verticalOffsetDistance": {
+            "type": "number",
+            "required": false,
+            "description": "垂直方向偏移距离",
+            "default": 0,
+            "category": "布局配置"
+        },
+        "store": {
+            "type": "any",
+            "required": false,
+            "description": "Jotai store 实例（可选，组件会自动创建兜底状态）",
+            "category": "状态管理"
+        },
+        "atomMap": {
+            "type": "object",
+            "required": false,
+            "description": "Jotai atoms 映射，需提供 pageBaseAtom 才能读取活动结束时间",
+            "category": "状态管理"
+        }
+    },
+    "aiGenerationGuide": {
+        "purpose": "活动倒计时组件，用于展示距离活动结束剩余天数，支持根据页面状态自动刷新",
+        "usageScenarios": [
+            "活动页顶部倒计时展示",
+            "营销活动剩余时间提示",
+            "需要依赖页面状态的时间文案"
+        ],
+        "keyFeatures": [
+            "根据 pageBaseAtom.campaignEndTime 计算剩余天数",
+            "设计态显示占位字符 x",
+            "支持字体颜色、背景色和垂直偏移配置",
+            "可接入 Jotai store / atomMap 读取页面状态"
+        ],
+        "layoutStructure": {
+            "container": "绝对定位胶囊容器，默认居中显示在页面上方",
+            "text": "单行倒计时文案，使用白字和半透明深色背景"
+        },
+        "styleGuide": {
+            "prefix": "mf-assets-count-down",
+            "position": "absolute + left: 50%",
+            "shape": "圆角胶囊"
+        },
+        "bestPractices": [
+            "页面需要提供 pageBaseAtom.campaignEndTime 才能显示真实倒计时",
+            "设计态可直接依赖默认占位，无需真实数据",
+            "如果要调整上下位置，优先使用 verticalOffsetDistance"
+        ],
+        "codeExample": "import { atom, createStore } from 'jotai';\nimport CountDown from '@smartgmp-components/count-down';\n\nconst store = createStore();\nconst pageBaseAtom = atom({ campaignEndTime: Date.now() + 3 * 24 * 60 * 60 * 1000, groupName: '示例活动' });\n\nexport default function Page() {\n  return <CountDown store={store} atomMap={{ pageBaseAtom }} />;\n}"
+    },
+    "apis": [],
+    "tracking": {
+        "events": []
+    },
+    "meta": {
+        "author": "smartgmp-team",
+        "createdAt": "2026-05-28T00:00:00Z"
+    },
+    "extractedLogic": {
+        "apis": [],
+        "sdkRequirements": {
+            "htwSdk": [],
+            "mfSdk": []
+        },
+        "mockData": {},
+        "types": [{
+            "file": "types.ts",
+            "code": "import type { PrimitiveAtom } from 'jotai';\n\nexport interface PageBase {\n  campaignEndTime: number;\n  groupName: string;\n}\n\nexport interface CountDownProps {\n  textColor?: string;\n  bgColor?: string;\n  verticalOffsetDistance?: number;\n  __designMode?: string;\n  store?: any;\n  atomMap?: {\n    pageBaseAtom: PrimitiveAtom<PageBase>;\n  };\n}\n"
+        }]
+    }
+}

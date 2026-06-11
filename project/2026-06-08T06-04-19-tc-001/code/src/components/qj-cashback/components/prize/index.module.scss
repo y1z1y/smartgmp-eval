@@ -1,0 +1,328 @@
+/* write style here */
+@mixin textOverflow($width: 100%) {
+  width: $width;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coupons-item__text {
+  font-size: 6.2px;
+  height: 9.5px;
+  line-height: 9.5px;
+  color: #ff6745;
+  font-weight: 500;
+  margin-top: 0;
+  letter-spacing: 1.6px;
+
+  span {
+    // transform: scale(0.5);
+    display: inline-block;
+    text-wrap: nowrap;
+  }
+}
+
+.coupons-item__main {
+  margin-top: 20px;
+  width: 100%;
+  color: #ff4c23;
+  font-weight: bold;
+  text-align: center;
+  font-size: 0;
+  white-space: nowrap;
+  margin-bottom: 4.5px;
+
+  &.long {
+    margin-bottom: -2px;
+
+    .num {
+      font-size: 34px;
+      line-height: 41px;
+    }
+  }
+
+  &.two-num {
+    .num {
+      font-size: 34px;
+    }
+  }
+
+  &.two-long-num {
+    .num {
+      font-size: 27.2px;
+    }
+
+    .unit {
+      font-size: 12px;
+    }
+  }
+
+  .num {
+    font-family: DIN-BlackItalic;
+    font-size: 43.5px;
+    line-height: 35.2px;
+    vertical-align: baseline;
+    letter-spacing: -1.7px;
+  }
+
+  .unit {
+    display: inline-block;
+    margin-left: 1px;
+    font-size: 14.5px;
+    line-height: 1;
+    font-weight: bolder;
+    vertical-align: baseline;
+    transform: translate(-1px, -1px);
+  }
+}
+
+.coupons-item__wrap {
+  margin-top: 4.5px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4.5px;
+  position: relative;
+
+  .coupons-item__img {
+    display: block;
+    width: 46.5px;
+    height: 46.5px;
+    object-fit: contain;
+  }
+
+  &.is-other {
+    flex-direction: column;
+
+    &.has-pic {
+      .item-img-box {
+        width: 70px;
+        height: 43px;
+        background-image: url('https://img-hxy021.didistatic.com/static/starimg/img/KEybi2a8Pw1709260917356.png');
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+
+        .coupons-item__img {
+          width: 100%;
+          height: auto;
+        }
+      }
+
+      .coupons-item-wrap-text {
+        margin-top: 2.5px;
+      }
+    }
+
+    .coupons-item-wrap-text {
+      color: #ff6745;
+      font-family: PingFangSC-Medium;
+      font-size: 6px;
+      letter-spacing: 1.5px;
+      line-height: 9px;
+      font-weight: 500;
+      width: max-content;
+      margin-top: 1px;
+
+      // 去除最后一个字体引起不居中情况
+      &::after {
+        content: attr(data-last-char);
+        letter-spacing: 0;
+      }
+    }
+  }
+}
+
+.coupons-popup {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  .coupons-popup__head {
+    width: 100%;
+    margin: 0 0 -50px;
+  }
+
+  .coupons-popup__container {
+    width: 276px;
+    height: auto;
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 6px;
+  }
+
+  .coupons-popup__item {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-width: 276px;
+    height: 84px;
+    background: no-repeat center / contain;
+    transition: opacity ease-in-out 0.2s;
+
+    &.gray {
+      opacity: 0.4;
+    }
+
+    & + .coupons-popup__item {
+      margin-top: 9.5px;
+    }
+
+    .coupons-popup__left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 92px;
+      flex-basis: 92px;
+      height: 84px;
+      padding-left: 6px;
+    }
+
+    .coupons-item__img {
+      display: block;
+      width: 46.5px;
+      height: 46.5px;
+      object-fit: contain;
+    }
+
+    .coupons-popup__right {
+      flex: 1;
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-left: 12px;
+    }
+
+    .coupons-popup__badge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 44px;
+      height: 18px;
+      background: no-repeat center / cover;
+
+      &.is-thirdChannelOrder {
+        width: 82px;
+      }
+    }
+
+    .coupons-popup__title {
+      margin-top: 0;
+      font-size: 13.7px;
+      font-weight: bold;
+      color: #4c4c4c;
+      height: 19px;
+      line-height: 19px;
+      letter-spacing: -0.9px;
+      @include textOverflow(130px);
+    }
+
+    .coupons-popup__subtitle {
+      margin-top: 1px;
+      font-size: 8.4px;
+      font-weight: 500;
+      color: #d19d92;
+      height: 12px;
+      line-height: 12px;
+      letter-spacing: -0.55px;
+      @include textOverflow(112px);
+    }
+  }
+
+  .coupons-popup__help_item {
+    width: 100%;
+    height: 84px;
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    margin: 8px auto;
+
+    .coupons-popup__help_item-box {
+      display: block;
+      width: 74px;
+      height: 74px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .coupons-popup__help_item__icon {
+      display: block;
+      width: 74px;
+      height: 74px;
+      object-fit: contain;
+    }
+
+    .coupons-popup__help_item__text {
+      margin-left: 15px;
+
+      &__title {
+        width: 131px;
+        font-family: PingFang-SC-Heavy;
+        font-size: 14px;
+        color: #4c4c4c;
+        font-weight: 500;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      &__desc {
+        width: 125px;
+        font-family: PingFangSC-Medium;
+        font-size: 9px;
+        color: #d19d92;
+        font-weight: 500;
+        margin-top: 4px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .coupons-popup__btn {
+    margin-top: 5px;
+    width: 265px;
+  }
+
+  .coupons_popup_sign_text {
+    width: 200px;
+    font-family: PingFangSC-Medium;
+    font-size: 9px;
+    color: #fff;
+    word-break: break-all;
+    margin-left: 3px;
+    letter-spacing: -1px;
+    font-weight: 500;
+    margin-top: 7px;
+    text-align: center;
+
+    span {
+      color: #ffee95;
+    }
+  }
+
+  .coupons-popup__close {
+    width: 40px;
+    height: 40px;
+    margin-top: 23px;
+    background: url('https://img-hxy021.didistatic.com/static/starimg/img/mqv8OcwoCj1678266028996.png')
+      no-repeat center / 20px 20px;
+  }
+}

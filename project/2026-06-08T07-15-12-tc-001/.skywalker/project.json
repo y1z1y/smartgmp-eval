@@ -1,0 +1,10 @@
+{
+  "name": "eval-tc-001",
+  "description": "评测用例 骑行任务活动页",
+  "created_at": "2026-06-08T07:15:12.855Z",
+  "updated_at": "2026-06-08T07:15:12.855Z",
+  "code_dir": "code",
+  "enabledPlugins": [
+    "smartgmp"
+  ]
+}

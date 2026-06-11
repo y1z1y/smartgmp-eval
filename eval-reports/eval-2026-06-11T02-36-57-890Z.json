@@ -1,0 +1,196 @@
+{
+  "timestamp": "2026-06-11T02:36:57.890Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": true,
+        "routePrecision": 1,
+        "redundantAgents": [],
+        "actualAgent": "ops-agent, gmp-dev-agent, gmp-dev-agent, ops-agent, gmp-dev-agent, ops-agent",
+        "toolSelectedCorrectly": true,
+        "toolPrecision": 0.5,
+        "redundantTools": [
+          "think"
+        ],
+        "actualTools": [
+          "mcp__smartgmp__pradox_cookie_save",
+          "mcp__smartgmp__basic_config",
+          "mcp__smartgmp__new_generate_page",
+          "user_workspace_list",
+          "user_workspace_list",
+          "user_workspace_read_file",
+          "user_workspace_add_dep",
+          "user_workspace_list",
+          "think",
+          "user_workspace_git",
+          "user_workspace_list",
+          "user_workspace_list",
+          "user_workspace_read_file",
+          "user_workspace_read_file",
+          "user_workspace_read_file",
+          "user_workspace_list",
+          "user_workspace_list",
+          "mcp__smartgmp__new_generate_page",
+          "mcp__smartgmp__activity_base_config",
+          "mcp__smartgmp__new_generate_page",
+          "mcp__smartgmp__activity_base_config"
+        ],
+        "score": 70
+      },
+      "quality": null,
+      "codeQuality": null,
+      "duration": null,
+      "timedOut": true,
+      "error": "超时（300s）",
+      "eventCount": 3913,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1781145168496
+        },
+        {
+          "tool": "mcp__smartgmp__pradox_cookie_save",
+          "agent": "ops-agent",
+          "ts": 1781145183896
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1781145188409
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1781145207284
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145216612
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145228202
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145231361
+        },
+        {
+          "tool": "user_workspace_read_file",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145235447
+        },
+        {
+          "tool": "user_workspace_add_dep",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145240387
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145243850
+        },
+        {
+          "tool": "think",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145255018
+        },
+        {
+          "tool": "user_workspace_git",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145260004
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145263068
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "orchestrator",
+          "ts": 1781145281775
+        },
+        {
+          "tool": "user_workspace_read_file",
+          "agent": "orchestrator",
+          "ts": 1781145285492
+        },
+        {
+          "tool": "user_workspace_read_file",
+          "agent": "orchestrator",
+          "ts": 1781145289886
+        },
+        {
+          "tool": "user_workspace_read_file",
+          "agent": "orchestrator",
+          "ts": 1781145295039
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1781145308027
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145314871
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145314871
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145320870
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1781145329743
+        },
+        {
+          "tool": "mcp__smartgmp__activity_base_config",
+          "agent": "ops-agent",
+          "ts": 1781145335039
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1781145353660
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1781145361837
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1781145373466
+        },
+        {
+          "tool": "mcp__smartgmp__activity_base_config",
+          "agent": "ops-agent",
+          "ts": 1781145383720
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 70,
+  "avgQualityScore": 0,
+  "avgCodeQualityScore": 0,
+  "avgTotalMs": 0,
+  "overallDurationGrade": "excellent"
+}

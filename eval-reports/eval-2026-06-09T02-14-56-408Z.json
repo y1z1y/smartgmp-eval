@@ -1,0 +1,100 @@
+{
+  "timestamp": "2026-06-09T02:14:56.408Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": true,
+        "actualAgent": "ops-agent, gmp-dev-agent, ops-agent, gmp-dev-agent",
+        "toolSelectedCorrectly": true,
+        "actualTools": [
+          "mcp__smartgmp__pradox_cookie_save",
+          "mcp__smartgmp__basic_config",
+          "mcp__smartgmp__new_generate_page",
+          "mcp__smartgmp__activity_base_config",
+          "mcp__smartgmp__new_generate_page"
+        ],
+        "score": 100
+      },
+      "quality": {
+        "compilePassed": true,
+        "runtimeOk": null,
+        "componentsMatched": true,
+        "failedComponents": [],
+        "installCompleted": false,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "count-down",
+          "rule-popup"
+        ],
+        "score": 65
+      },
+      "duration": {
+        "totalMs": 129183,
+        "intentMs": 35139,
+        "toolMs": 94044,
+        "totalGrade": "pass",
+        "score": 35
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 2245,
+      "toolCalls": [
+        {
+          "tool": "mcp__smartgmp__pradox_cookie_save",
+          "agent": "orchestrator",
+          "ts": 1780971201524
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780971208899
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780971218014
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780971228942
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780971237343
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780971260410
+        },
+        {
+          "tool": "mcp__smartgmp__activity_base_config",
+          "agent": "ops-agent",
+          "ts": 1780971269131
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780971283723
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780971293596
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 100,
+  "avgQualityScore": 65,
+  "avgTotalMs": 129183,
+  "overallDurationGrade": "pass"
+}

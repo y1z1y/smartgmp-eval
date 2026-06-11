@@ -1,0 +1,18 @@
+.mf-assist-dialog-iframe {
+  height: calc(100vh - 89px);
+  width: 100%;
+  border-radius: 10px 10px 0 0;
+  position: absolute;
+  background-color: white;
+  bottom: 0;
+  left: 0;
+}
+.mf-assist-dialog-iframe-close {
+  background-image: url(https://s3-gz01.didistatic.com/packages-mait/img/2bBDT9AAOF1722308512707.png);
+  background-size: 100% 100%;
+  width: 27px;
+  height: 27px;
+  position: absolute;
+  top: 50px;
+  right: 13px;
+}

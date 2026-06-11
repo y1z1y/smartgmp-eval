@@ -1,0 +1,20 @@
+{
+  "name": "smartgmp-eval",
+  "version": "1.0.0",
+  "description": "SkyWalker 页面生成评测工具 — 自动化意图识别、页面质量、端到端耗时评测",
+  "type": "module",
+  "scripts": {
+    "eval": "tsx src/index.ts",
+    "eval:verbose": "tsx src/index.ts --verbose"
+  },
+  "dependencies": {
+    "tsx": "^4.19.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "typescript": "^6.0.3"
+  }
+}

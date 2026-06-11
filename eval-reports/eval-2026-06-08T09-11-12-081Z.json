@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-06-08T09:11:12.081Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": true,
+        "actualAgent": "ops-agent, gmp-dev-agent",
+        "toolSelectedCorrectly": true,
+        "actualTools": [
+          "mcp__smartgmp__pradox_cookie_save",
+          "mcp__smartgmp__basic_config",
+          "mcp__smartgmp__new_generate_page"
+        ],
+        "score": 100
+      },
+      "quality": {
+        "compilePassed": false,
+        "runtimeOk": null,
+        "componentsMatched": false,
+        "failedComponents": [],
+        "installCompleted": false,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "index.tsx",
+          "sdk-setup.ts",
+          "app-bootstrap.tsx",
+          "page-component-props.ts",
+          "page-stage.css"
+        ],
+        "score": 0
+      },
+      "duration": {
+        "totalMs": 164502,
+        "intentMs": 60957,
+        "toolMs": 103545,
+        "totalGrade": "pass",
+        "score": 35
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 2012,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780909768533
+        },
+        {
+          "tool": "mcp__smartgmp__pradox_cookie_save",
+          "agent": "ops-agent",
+          "ts": 1780909791784
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780909791785
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780909813594
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780909827806
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 100,
+  "avgQualityScore": 0,
+  "avgTotalMs": 164502,
+  "overallDurationGrade": "pass"
+}

@@ -1,0 +1,85 @@
+{
+  "timestamp": "2026-06-03T08:44:45.060Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": false,
+        "actualAgent": ", ",
+        "toolSelectedCorrectly": true,
+        "actualTools": [
+          "mcp__smartgmp__basic_config",
+          "think",
+          "mcp__smartgmp__new_generate_page"
+        ],
+        "paramCompleteness": 0,
+        "paramMatchDetails": [
+          "无法解析工具输入参数"
+        ],
+        "score": 40
+      },
+      "quality": {
+        "compilePassed": true,
+        "runtimeOk": null,
+        "componentsMatched": true,
+        "failedComponents": [],
+        "installCompleted": false,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "index.tsx",
+          "sdk-setup.ts",
+          "app-bootstrap.tsx",
+          "page-component-props.ts",
+          "page-stage.css"
+        ],
+        "score": 75
+      },
+      "duration": {
+        "totalMs": 50686,
+        "intentMs": 8128,
+        "toolMs": 42558,
+        "totalGrade": "excellent",
+        "score": 100
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 408,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780476242494
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780476249312
+        },
+        {
+          "tool": "think",
+          "agent": "orchestrator",
+          "ts": 1780476263400
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780476277075
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780476284947
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 40,
+  "avgQualityScore": 75,
+  "avgTotalMs": 50686,
+  "overallDurationGrade": "excellent"
+}

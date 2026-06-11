@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-06-08T08:04:27.891Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": true,
+        "actualAgent": "ops-agent",
+        "toolSelectedCorrectly": false,
+        "actualTools": [
+          "mcp__smartgmp__basic_config"
+        ],
+        "paramCompleteness": 0,
+        "paramMatchDetails": [
+          "未找到 new_generate_page 调用"
+        ],
+        "score": 30
+      },
+      "quality": null,
+      "duration": null,
+      "timedOut": true,
+      "error": "超时（300s）",
+      "eventCount": 300,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780905583771
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780905589140
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 30,
+  "avgQualityScore": 0,
+  "avgTotalMs": 0,
+  "overallDurationGrade": "excellent"
+}

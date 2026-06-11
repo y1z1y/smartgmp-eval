@@ -1,0 +1,49 @@
+{
+  "name": "eval-tc-001",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:publish": "vite build --config vite.config.publish.ts",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@didi/webx-js": "^2.22.2",
+    "@didi/webx-js-web": "^2.22.0",
+    "@didi/wsgsdk": "^1.5.16",
+    "antd-mobile": "^5.0.0",
+    "axios": "^1.6.0",
+    "classnames": "^2.5.1",
+    "coordtransform": "^2.1.2",
+    "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.0",
+    "framer-motion": "^11.0.0",
+    "jotai": "^2.11.3",
+    "lodash": "^4.17.0",
+    "qs": "^6.11.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-intersection-observer": "^9.5.0",
+    "swiper": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.0",
+    "@types/lodash": "^4.17.0",
+    "@types/qs": "^6.9.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "postcss-pxtorem": "^6.0.0",
+    "sass": "^1.60.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.3.5",
+    "vite-plugin-singlefile": "^2.3.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1"
+    }
+  }
+}

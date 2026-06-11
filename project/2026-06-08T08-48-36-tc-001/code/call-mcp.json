@@ -1,0 +1,7 @@
+{
+  "tool": "mcp__skywalker__gpt_image_2_draw",
+  "arguments": {
+    "prompt": "A vibrant and energetic cycling promotional banner. The scene shows a dynamic outdoor setting with a cyclist riding through a sunlit urban park or greenway. The atmosphere is fresh, lively, and sporty with bright blue sky, lush greenery, and warm sunlight. Modern cityscape or natural landscape in background.\n\nTEXT RENDERING (CRITICAL - MUST BE LARGE AND PROMINENT):\n- Main title \"骑行返现\" rendered in VERY LARGE, BOLD, EYE-CATCHING font, prominently displayed in the upper-center area of the image. Use bright colors like orange, red, or yellow with high contrast against the background. Add glow effects or outlines if needed for better visibility.\n- Subtitle \"骑行领现金 越骑越有钱\" rendered in clearly readable size below the main title, also with high contrast.\n\nIMPORTANT: Render the Chinese text EXACTLY as quoted, character by character. Do NOT alter, omit, or substitute any character. The main title \"骑行返现\" must be the most dominant visual element.\n\nStyle: Vibrant, fresh, sporty, energetic. High contrast, bright colors (blues, greens, oranges). Professional marketing banner quality. Clean layout with clear focal point on the text.",
+    "size": "1125x633"
+  }
+}

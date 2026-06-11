@@ -1,0 +1,82 @@
+{
+  "timestamp": "2026-06-03T09:29:11.333Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": true,
+        "actualAgent": "ops-agent, gmp-dev-agent",
+        "toolSelectedCorrectly": true,
+        "actualTools": [
+          "mcp__smartgmp__basic_config",
+          "mcp__smartgmp__new_generate_page"
+        ],
+        "paramCompleteness": 0,
+        "paramMatchDetails": [
+          "关键词缺失: 帮我创建一个骑行返现的活动营销页"
+        ],
+        "score": 70
+      },
+      "quality": {
+        "compilePassed": true,
+        "runtimeOk": null,
+        "componentsMatched": true,
+        "failedComponents": [],
+        "installCompleted": true,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "index.tsx",
+          "sdk-setup.ts",
+          "app-bootstrap.tsx",
+          "page-component-props.ts",
+          "page-stage.css",
+          "vite.config.ts",
+          "index.html",
+          "main.tsx"
+        ],
+        "score": 79
+      },
+      "duration": {
+        "totalMs": 58636,
+        "intentMs": 13933,
+        "toolMs": 44703,
+        "totalGrade": "excellent",
+        "score": 93
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 551,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780478906554
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780478910412
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780478936348
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780478949237
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 70,
+  "avgQualityScore": 79,
+  "avgTotalMs": 58636,
+  "overallDurationGrade": "excellent"
+}

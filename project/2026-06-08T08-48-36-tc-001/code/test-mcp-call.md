@@ -1,0 +1,1 @@
+Testing MCP tool call

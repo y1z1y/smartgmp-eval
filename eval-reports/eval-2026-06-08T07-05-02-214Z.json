@@ -1,0 +1,105 @@
+{
+  "timestamp": "2026-06-08T07:05:02.214Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": true,
+        "actualAgent": "ops-agent, design-agent, gmp-dev-agent",
+        "toolSelectedCorrectly": true,
+        "actualTools": [
+          "mcp__smartgmp__basic_config",
+          "mcp__skywalker__nano_banana_draw",
+          "mcp__skywalker__nano_banana_result",
+          "design_save_image_from_url",
+          "mcp__skywalker__image_upload",
+          "mcp__smartgmp__new_generate_page"
+        ],
+        "paramCompleteness": 0,
+        "paramMatchDetails": [
+          "关键词缺失: 帮我创建一个骑行返现的活动营销页"
+        ],
+        "score": 70
+      },
+      "quality": {
+        "compilePassed": true,
+        "runtimeOk": null,
+        "componentsMatched": true,
+        "failedComponents": [],
+        "installCompleted": true,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "count-down",
+          "rule-popup"
+        ],
+        "score": 75
+      },
+      "duration": {
+        "totalMs": 155145,
+        "intentMs": 14231,
+        "toolMs": 140914,
+        "totalGrade": "pass",
+        "score": 58
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 2202,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780902160560
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780902167337
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780902184407
+        },
+        {
+          "tool": "mcp__skywalker__nano_banana_draw",
+          "agent": "design-agent",
+          "ts": 1780902202381
+        },
+        {
+          "tool": "mcp__skywalker__nano_banana_result",
+          "agent": "design-agent",
+          "ts": 1780902206971
+        },
+        {
+          "tool": "design_save_image_from_url",
+          "agent": "design-agent",
+          "ts": 1780902244923
+        },
+        {
+          "tool": "mcp__skywalker__image_upload",
+          "agent": "design-agent",
+          "ts": 1780902253834
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780902287063
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780902296166
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 70,
+  "avgQualityScore": 75,
+  "avgTotalMs": 155145,
+  "overallDurationGrade": "pass"
+}

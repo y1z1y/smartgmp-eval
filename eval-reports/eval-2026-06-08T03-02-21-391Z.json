@@ -1,0 +1,76 @@
+{
+  "timestamp": "2026-06-08T03:02:21.391Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": true,
+        "actualAgent": "ops-agent, gmp-dev-agent",
+        "toolSelectedCorrectly": true,
+        "actualTools": [
+          "mcp__smartgmp__basic_config",
+          "mcp__smartgmp__new_generate_page"
+        ],
+        "paramCompleteness": 0,
+        "paramMatchDetails": [
+          "关键词缺失: 帮我创建一个骑行返现的活动营销页"
+        ],
+        "score": 70
+      },
+      "quality": {
+        "compilePassed": true,
+        "runtimeOk": null,
+        "componentsMatched": true,
+        "failedComponents": [],
+        "installCompleted": false,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "count-down",
+          "rule-popup"
+        ],
+        "score": 65
+      },
+      "duration": {
+        "totalMs": 58934,
+        "intentMs": 14913,
+        "toolMs": 44021,
+        "totalGrade": "excellent",
+        "score": 93
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 714,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780887696994
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780887703235
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780887726990
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780887740873
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 70,
+  "avgQualityScore": 65,
+  "avgTotalMs": 58934,
+  "overallDurationGrade": "excellent"
+}

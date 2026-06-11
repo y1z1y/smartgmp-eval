@@ -1,0 +1,49 @@
+[{
+        "id": "tc-001",
+        "name": "骑行任务活动页",
+        "prompt": "帮我创建一个骑行返现的活动营销页",
+        "expectedIntent": "page_generation",
+        "expectedTools": ["new_generate_page"],
+        "expectedComponents": ["count-down", "rule-popup"],
+        "timeoutMs": 300000,
+        "basicConfig": {
+            "campaignId": "10289487",
+            "bizId": "363",
+            "env": "stable",
+            "simCluster": "zjy-dev-v",
+            "forceLogin": true
+        }
+    },
+    {
+        "id": "tc-002",
+        "name": "指定组件生成页面",
+        "prompt": "生成一个，含活动倒计时组件、规则弹窗组件、分享组件、分享蒙层，活动页",
+        "expectedIntent": "page_generation",
+        "expectedTools": ["new_generate_page"],
+        "expectedComponents": ["count-down", "rule-popup"],
+        "timeoutMs": 300000,
+        "basicConfig": {
+            "campaignId": "10289487",
+            "bizId": "363",
+            "env": "stable",
+            "simCluster": "zjy-dev-v",
+            "forceLogin": true
+        }
+    },
+    {
+        "id": "tc-003",
+        "name": "裂变助力页",
+        "prompt": "创建一个好友助力裂变活动页面",
+        "expectedIntent": "page_generation",
+        "expectedTools": ["new_generate_page"],
+        "expectedComponents": ["act-header", "mf-qj-assist"],
+        "timeoutMs": 300000,
+        "basicConfig": {
+            "campaignId": "10289487",
+            "bizId": "363",
+            "env": "stable",
+            "simCluster": "zjy-dev-v",
+            "forceLogin": true
+        }
+    }
+]

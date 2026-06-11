@@ -1,0 +1,129 @@
+{
+  "timestamp": "2026-06-09T07:15:24.368Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-002",
+      "name": "指定组件生成页面",
+      "prompt": "生成一个，含活动倒计时组件、规则弹窗组件、分享组件、分享蒙层，活动页",
+      "intent": {
+        "routedCorrectly": true,
+        "actualAgent": "ops-agent, gmp-dev-agent",
+        "toolSelectedCorrectly": true,
+        "actualTools": [
+          "mcp__smartgmp__pradox_cookie_save",
+          "mcp__smartgmp__basic_config",
+          "mcp__smartgmp__new_generate_page",
+          "user_workspace_list",
+          "user_workspace_list",
+          "user_workspace_read_file",
+          "user_workspace_add_dep",
+          "user_workspace_add_dep",
+          "user_workspace_add_dep",
+          "user_workspace_add_dep",
+          "user_workspace_list",
+          "mcp__smartgmp__new_generate_page"
+        ],
+        "score": 100
+      },
+      "quality": {
+        "compilePassed": false,
+        "runtimeOk": null,
+        "componentsMatched": true,
+        "failedComponents": [],
+        "installCompleted": true,
+        "fileCompleteness": 1,
+        "missingFiles": [],
+        "score": 85
+      },
+      "duration": {
+        "totalMs": 149960,
+        "intentMs": 44905,
+        "toolMs": 105055,
+        "totalGrade": "pass",
+        "score": 35
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 1518,
+      "toolCalls": [
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780989188638
+        },
+        {
+          "tool": "mcp__smartgmp__pradox_cookie_save",
+          "agent": "ops-agent",
+          "ts": 1780989213223
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780989213223
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780989231224
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989248512
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989255720
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989255721
+        },
+        {
+          "tool": "user_workspace_read_file",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989260147
+        },
+        {
+          "tool": "user_workspace_add_dep",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989266726
+        },
+        {
+          "tool": "user_workspace_add_dep",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989271348
+        },
+        {
+          "tool": "user_workspace_add_dep",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989275714
+        },
+        {
+          "tool": "user_workspace_add_dep",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989278519
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989283018
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780989291419
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 100,
+  "avgQualityScore": 85,
+  "avgTotalMs": 149960,
+  "overallDurationGrade": "pass"
+}

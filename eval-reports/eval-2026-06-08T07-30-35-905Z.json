@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-06-08T07:30:35.905Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-001",
+      "name": "骑行任务活动页",
+      "prompt": "帮我创建一个骑行返现的活动营销页",
+      "intent": {
+        "routedCorrectly": false,
+        "actualAgent": "orchestrator",
+        "toolSelectedCorrectly": false,
+        "actualTools": [],
+        "paramCompleteness": 0,
+        "paramMatchDetails": [
+          "未找到 new_generate_page 调用"
+        ],
+        "score": 0
+      },
+      "quality": {
+        "compilePassed": false,
+        "runtimeOk": null,
+        "componentsMatched": false,
+        "failedComponents": [],
+        "installCompleted": false,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "index.tsx",
+          "sdk-setup.ts",
+          "app-bootstrap.tsx",
+          "page-component-props.ts",
+          "page-stage.css"
+        ],
+        "score": 0
+      },
+      "duration": {
+        "totalMs": 12869,
+        "intentMs": 12869,
+        "toolMs": 0,
+        "totalGrade": "excellent",
+        "score": 93
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 368,
+      "toolCalls": []
+    }
+  ],
+  "avgIntentScore": 0,
+  "avgQualityScore": 0,
+  "avgTotalMs": 12869,
+  "overallDurationGrade": "excellent"
+}

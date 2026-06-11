@@ -1,0 +1,105 @@
+{
+  "timestamp": "2026-06-09T02:46:56.543Z",
+  "totalCases": 1,
+  "pageGenCases": 1,
+  "nonPageCases": 0,
+  "results": [
+    {
+      "id": "tc-002",
+      "name": "指定组件生成页面",
+      "prompt": "生成一个，含活动倒计时组件、规则弹窗组件、分享组件、分享蒙层，活动页",
+      "intent": {
+        "routedCorrectly": true,
+        "actualAgent": "ops-agent, gmp-dev-agent",
+        "toolSelectedCorrectly": true,
+        "actualTools": [
+          "think",
+          "mcp__smartgmp__pradox_cookie_save",
+          "mcp__smartgmp__basic_config",
+          "mcp__smartgmp__new_generate_page",
+          "user_workspace_list",
+          "user_workspace_list",
+          "user_workspace_git"
+        ],
+        "score": 100
+      },
+      "quality": {
+        "compilePassed": false,
+        "runtimeOk": null,
+        "componentsMatched": false,
+        "failedComponents": [],
+        "installCompleted": false,
+        "fileCompleteness": 0,
+        "missingFiles": [
+          "index.tsx",
+          "sdk-setup.ts",
+          "app-bootstrap.tsx",
+          "page-component-props.ts",
+          "page-stage.css"
+        ],
+        "score": 0
+      },
+      "duration": {
+        "totalMs": 125321,
+        "intentMs": 12088,
+        "toolMs": 113233,
+        "totalGrade": "pass",
+        "score": 58
+      },
+      "timedOut": false,
+      "error": null,
+      "eventCount": 1566,
+      "toolCalls": [
+        {
+          "tool": "think",
+          "agent": "orchestrator",
+          "ts": 1780973103307
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780973140420
+        },
+        {
+          "tool": "mcp__smartgmp__pradox_cookie_save",
+          "agent": "ops-agent",
+          "ts": 1780973159437
+        },
+        {
+          "tool": "mcp__smartgmp__basic_config",
+          "agent": "ops-agent",
+          "ts": 1780973159437
+        },
+        {
+          "tool": "sessions_spawn",
+          "agent": "orchestrator",
+          "ts": 1780973175477
+        },
+        {
+          "tool": "mcp__smartgmp__new_generate_page",
+          "agent": "gmp-dev-agent",
+          "ts": 1780973185257
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "gmp-dev-agent",
+          "ts": 1780973189793
+        },
+        {
+          "tool": "user_workspace_list",
+          "agent": "orchestrator",
+          "ts": 1780973204246
+        },
+        {
+          "tool": "user_workspace_git",
+          "agent": "orchestrator",
+          "ts": 1780973207713
+        }
+      ]
+    }
+  ],
+  "avgIntentScore": 100,
+  "avgQualityScore": 0,
+  "avgTotalMs": 125321,
+  "overallDurationGrade": "pass"
+}
