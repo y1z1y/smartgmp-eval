@@ -5,13 +5,14 @@
         "expectedIntent": "page_generation",
         "expectedTools": ["new_generate_page"],
         "expectedComponents": ["count-down", "rule-popup"],
-        "timeoutMs": 300000,
+        "timeoutMs": 600000,
         "basicConfig": {
-            "campaignId": "10289487",
             "bizId": "363",
+            "forceLogin": true,
             "env": "stable",
-            "simCluster": "zjy-dev-v",
-            "forceLogin": true
+            "bEnv": "stable",
+            "cEnv": "stable",
+            "simCluster": "zjy-dev-v"
         }
     },
     {
@@ -21,13 +22,14 @@
         "expectedIntent": "page_generation",
         "expectedTools": ["new_generate_page"],
         "expectedComponents": ["count-down", "rule-popup"],
-        "timeoutMs": 300000,
+        "timeoutMs": 600000,
         "basicConfig": {
-            "campaignId": "10289487",
             "bizId": "363",
+            "forceLogin": true,
             "env": "stable",
-            "simCluster": "zjy-dev-v",
-            "forceLogin": true
+            "bEnv": "stable",
+            "cEnv": "stable",
+            "simCluster": "zjy-dev-v"
         }
     },
     {
@@ -37,13 +39,14 @@
         "expectedIntent": "page_generation",
         "expectedTools": ["new_generate_page"],
         "expectedComponents": ["act-header", "mf-qj-assist"],
-        "timeoutMs": 300000,
+        "timeoutMs": 600000,
         "basicConfig": {
-            "campaignId": "10289487",
             "bizId": "363",
+            "forceLogin": true,
             "env": "stable",
-            "simCluster": "zjy-dev-v",
-            "forceLogin": true
+            "bEnv": "stable",
+            "cEnv": "stable",
+            "simCluster": "zjy-dev-v"
         }
     }
 ]

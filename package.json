@@ -4,8 +4,8 @@
   "description": "SkyWalker 页面生成评测工具 — 自动化意图识别、页面质量、端到端耗时评测",
   "type": "module",
   "scripts": {
-    "eval": "tsx src/index.ts",
-    "eval:verbose": "tsx src/index.ts --verbose"
+    "preeval": "pnpm install",
+    "eval": "tsx src/index.ts"
   },
   "dependencies": {
     "tsx": "^4.19.0"

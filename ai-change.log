@@ -1,0 +1,100 @@
+# AI 变更日志
+
+## 2026-06-23 移除打分机制，重心改为调用链路分析+阶段耗时
+
+### 变更内容
+
+1. **src/types.ts**
+   - `IntentScore` → `IntentAnalysis`：去掉 `routePrecision`/`toolPrecision`/`score`，改为记录链路事实（`actualAgents`/`actualTools`/`redundantAgents`/`redundantTools`）
+   - `QualityScore` → `QualityResult`：去掉 `score`/`fileCompleteness`，改为 `matchedComponents`/`missingComponents`
+   - `CodeQualityScore` → `CodeQualityAnalysis`：去掉所有 `*Score` 字段和 `score`，只保留 `*Issues`
+   - `DurationScore` → `DurationBreakdown`：去掉 `totalGrade`/`intentGrade`/`score`，只保留时间数值
+   - 删除 `DurationGrade` 类型
+   - `EvalReport`：去掉 `avgIntentScore`/`avgQualityScore`/`avgCodeQualityScore`/`overallDurationGrade`，改为 `intentCorrectCount`/`toolCorrectCount`/`avgTotalMs`
+
+2. **src/scorer.ts**
+   - `scoreIntent()` → `analyzeIntent()`：只做链路分析，不计算分数
+   - `scoreDuration()` → `computeDuration()`：只计算耗时，不打分不评级
+   - `scoreCase()` → `analyzeCase()`：对应新接口
+   - 删除 `gradeDuration()`/`gradeToScore()`/耗时阈值/评级逻辑
+   - 删除路由精确率×40 + 工具精确率×60 的分数计算
+
+3. **src/index.ts**
+   - 引用 `analyzeCase` 替代 `scoreCase`
+   - 摘要输出从「评分摘要 + 百分比」改为「链路分析 + 耗时 + 检测结果」
+   - 退出码判断从 `intent.score === 0` 改为 `!intent.routedCorrectly`
+
+4. **src/reporter.ts**
+   - 去掉打分表格，改为每个用例展示路由链、工具链、耗时、页面检测状态
+   - 汇总行从「平均分」改为「正确数/总数 + 平均耗时」
+
+5. **src/preview-checker.ts**
+   - `checkPageQuality()` 去掉各维度加分逻辑，只输出检测结果（布尔/列表）
+   - `checkComponentAccuracy()` 去掉 `accuracy` 字段，改为 `matchedExpected`/`missingExpected`
+
+6. **src/code-quality.ts**
+   - 各检查函数去掉 `score` 计算和扣分逻辑，只返回 `issues[]`
+   - `checkCodeQuality()` 返回 `CodeQualityAnalysis` 替代 `CodeQualityScore`
+   - 去掉 `DuplicateResult`/`TypeSafetyResult` 等中间类型中的 `score`
+
+## 2026-06-29 修复页面生成流程 + 依赖自动安装
+
+### 变更内容
+
+1. **src/runner.ts**
+   - 新增 `buildGeneratePagePrompt()`：`pradox_campaign_create` 完成后自动催促生成页面
+   - 多轮对话增加优先级2：检测 campaign_create tool_result 后，自动推送消息让 agent 继续 spawn gmp-dev-agent
+   - `maxRounds` 从 5 增加到 8，确保多步骤流程能走完
+   - 新增 `hasRepliedCampaignDone` 标记，避免重复催促
+   - 优化催促消息措辞：明确"不要再调用 pradox_campaign_create"
+
+2. **src/preview-checker.ts**
+   - `checkPageQuality()` 中：检测到 node_modules 不存在时，自动运行 `pnpm install`
+   - `new_generate_page` 可能不跑 pnpm install，评测工具侧补充安装
+
+3. **src/scorer.ts**
+   - `checkPageQualityFromDisk()` 中：同样增加自动 pnpm install 逻辑
+
+4. **pnpm install --ignore-workspace**
+   - 所有 pnpm install 命令增加 `--ignore-workspace` 标志
+   - 原因：项目根目录有 pnpm-lock.yaml/pnpm-workspace.yaml，pnpm 在子目录运行时误判依赖已安装
+   - 影响文件：src/index.ts、src/preview-checker.ts、src/scorer.ts
+
+5. **终端输出精简**
+   - 去掉 [quality] 和 [code-quality] 内部调试日志
+   - 去掉 [runner] PENDING_USER_INPUT 和 Cookie 检测日志
+   - 只保留关键用户信息：路由、工具、耗时、页面状态
+
+6. **终端输出优化：每步带耗时 + 阶段汇总**
+   - 实时 SSE 事件打印加累计耗时标签：`🔀 Spawn → ops-agent [9.3s]`
+   - 工具名简化：`mcp__smartgmp__basic_config` → `basic_config`
+   - 新增 `StageTiming` 阶段追踪：按 agent 分阶段记录耗时
+   - 汇总输出改为阶段耗时：`活动配置 23.4s → 生成头图 86.2s → 生成页面 18.0s`
+   - 报告表同步更新，展示阶段耗时而非"思考+执行"
+
+## 2026-06-30 终端耗时显示重构：准确归属 + spawn分解 + 并行支持
+
+### 变更内容
+
+1. **src/runner.ts** — 核心改动
+   - 耗时归属重构：每个耗时挂在实际执行的步骤上，不再挂到下一个事件
+     - `🧠 思考` / `📝 输出`：打印流事件累加的实际耗时
+     - `tool_call`：不打印耗时（调用瞬间，思考已打印过）
+     - `tool_result`：打印工具执行耗时（call→result），≤2ms 不显示（SSE批量不准就不误导）
+     - spawn 完成：打印"共"总耗时 + 时间分解
+   - 新增 `spawnTimeBreakdown` Map：追踪每个 spawn agent 的思考/输出/工具/等待耗时
+   - spawn 完成行格式：`↩ 活动配置 共22.2s (思考7.7s+输出6.4s+工具1.1s+等待7.0s)`
+   - spawn agent_id 配对：新增 `pendingSpawnAgentIds` Map，在 tool_call 时记录 call→agent_id 对应关系，
+     tool_result 时配对获取 agent_id（不再依赖 result 文本解析，因为实际 result 是纯文本不是 JSON）
+   - 并行 spawn 支持：
+     - tool_call 时支持 `agent_ids` 数组格式
+     - 并行 spawn 打印：`🔀 spawn ∥ 生成头图 + 设计处理`
+     - 批量 result：`↩ ∥ 生成头图 45s, 设计处理 38s | 并行总耗时 共45s`
+     - 逐个 result：标记 ∥，最后一个完成后打印"并行全部完成"
+     - 并行总耗时 = max(各 agent 耗时)，不是求和
+
+2. **src/scorer.ts** — spawn 解析兼容并行
+   - `spawnedAgents` 提取改用 `flatMap` + `agent_ids` 数组支持
+
+3. **src/proxy.ts** — spawn 打印兼容并行
+   - 并行 spawn 打印 `Spawn ∥ A + B`，单个打印 `Spawn → A`

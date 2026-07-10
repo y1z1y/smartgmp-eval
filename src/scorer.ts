@@ -1,19 +1,23 @@
 /**
- * 评分器 — 意图识别、页面质量、端到端耗时三维度评分
+ * 分析器 — 调用链路分析 + 阶段耗时记录
+ *
+ * 不打分，只记录事实：
+ * - 路由到哪个 agent、是否正确、有无多余
+ * - 调了哪些工具、是否正确、有无多余
+ * - 各阶段耗时
  */
 import type {
   TestCase,
   TimedEvent,
-  IntentScore,
-  DurationScore,
-  DurationGrade,
+  IntentAnalysis,
+  DurationBreakdown,
   CaseResult,
   EvalReport,
 } from './types.js';
 import { checkPageQuality } from './preview-checker.js';
 import type { RunResult } from './runner.js';
 
-// ========== 意图识别评分 ==========
+// ========== 意图识别链路分析 ==========
 
 /**
  * 意图类型到期望 agent 的映射
@@ -32,22 +36,20 @@ const INTENT_AGENT_MAP: Record<string, string[]> = {
  * 流程辅助工具白名单 — 这些工具是正常流程中必需的，不计入多余调用
  */
 const AUXILIARY_TOOLS: Set<string> = new Set([
-  'basic_config',             // 基础配置，页面生成前必须先调
-  'activity_base_config',     // 活动基础配置
-  'user_workspace_list',      // 查看工作区文件列表
-  'user_workspace_add_dep',   // 安装依赖
-  'user_workspace_git',       // git 操作
-  'user_workspace_read_file', // 读取文件
-  'pradox_cookie_save',       // cookie 存储
-  'design_save_image_from_url', // 图片保存
-  'image_upload',             // 图片上传
+  'basic_config',
+  'activity_base_config',
+  'user_workspace_list',
+  'user_workspace_add_dep',
+  'user_workspace_git',
+  'user_workspace_read_file',
+  'pradox_cookie_save',
+  'design_save_image_from_url',
+  'image_upload',
 ]);
 
 /** 判断工具名是否属于白名单（支持全名匹配和后缀匹配） */
 function isAuxiliaryTool(toolName: string): boolean {
-  // 全名匹配
   if (AUXILIARY_TOOLS.has(toolName)) return true;
-  // 后缀匹配：mcp__smartgmp__basic_config → 匹配 basic_config
   for (const aux of AUXILIARY_TOOLS) {
     if (toolName.endsWith(aux)) return true;
   }
@@ -55,176 +57,100 @@ function isAuxiliaryTool(toolName: string): boolean {
 }
 
 /**
- * 评估意图识别准确率
+ * 分析意图识别链路
  */
-export function scoreIntent(
+export function analyzeIntent(
   testCase: TestCase,
   events: TimedEvent[],
-): IntentScore {
-  // 收集所有 tool_call 事件
+): IntentAnalysis {
   const toolCalls = events.filter(e => e.event.type === 'tool_call');
 
-  // 判断路由：看 spawn 了哪个 agent
   const spawnedAgents = toolCalls
     .filter(e => e.event.tool_name === 'sessions_spawn' || e.event.tool_name === 'sessions_spawn_parallel')
-    .map(e => {
+    .flatMap(e => {
       try {
         const raw = e.event.tool_input ?? '{}';
         const input = typeof raw === 'string' ? JSON.parse(raw) : raw;
-        return input.agent_id ?? '';
+        // 支持单个 agent_id 或多个 agent_ids
+        const ids: string[] = input.agent_ids ?? (input.agent_id ? [input.agent_id] : []);
+        return ids.length > 0 ? ids : (input.agent_id ? [input.agent_id] : []);
       } catch {
-        return '';
+        return [];
       }
-    });
+    })
+    .filter(Boolean);
 
-  // 判断实际调用的工具（排除 spawn 类）
   const actualTools = toolCalls
     .map(e => e.event.tool_name ?? '')
     .filter(name => name && !name.startsWith('sessions_spawn'));
 
-  // 1. 路由评分（基于精确率 precision）
+  // 1. 路由分析
   const expectedAgents = INTENT_AGENT_MAP[testCase.expectedIntent] ?? ['orchestrator'];
-
-  // 命中的期望 agent 数
   const agentHitCount = spawnedAgents.filter(a => expectedAgents.includes(a)).length;
-  // 多余 agent：实际 spawn 的 - 命中的
   const redundantAgents = spawnedAgents.filter(a => !expectedAgents.includes(a));
-
   const routedCorrectly = agentHitCount > 0;
-  // 精确率 = 命中数 / 实际 spawn 总数（没 spawn 任何 agent 则精确率为 0）
-  const routePrecision = spawnedAgents.length > 0
-    ? agentHitCount / spawnedAgents.length
-    : 0;
-  const routeScore = Math.round(routePrecision * 40);
 
-  const actualAgent = spawnedAgents.length > 0
-    ? spawnedAgents.join(', ')
-    : '(未spawn)';
-
-  // 2. 工具选择评分（基于精确率 precision）
+  // 2. 工具选择分析
   const expectedToolNames = testCase.expectedTools;
-
-  // 命中的期望工具数
   const hitCount = expectedToolNames.filter(et =>
     actualTools.some(at => at === et || at.endsWith(et))
   ).length;
 
-  // 多余工具：实际调用的 - 期望命中的 - 白名单辅助工具
   const redundantTools = actualTools.filter(at => {
-    // 如果是期望工具的命中项，不算多余
     const isExpected = expectedToolNames.some(et => at === et || at.endsWith(et));
     if (isExpected) return false;
-    // 如果是辅助工具，不算多余
     if (isAuxiliaryTool(at)) return false;
     return true;
   });
 
-  // 精确率 = 命中的期望工具数 / (命中的期望工具数 + 多余工具数)
-  // 没有调用任何工具时精确率为 0
-  const toolPrecision = (hitCount + redundantTools.length) > 0
-    ? hitCount / (hitCount + redundantTools.length)
-    : 0;
-
   const toolSelectedCorrectly = hitCount > 0;
-  const toolScore = Math.round(toolPrecision * 60);
-
-  // 计算总分（路由精确率×40 + 工具精确率×60）
-  const score = routeScore + toolScore;
 
   return {
     routedCorrectly,
-    routePrecision,
     redundantAgents,
-    actualAgent,
+    actualAgents: spawnedAgents,
     toolSelectedCorrectly,
-    toolPrecision,
     redundantTools,
     actualTools,
-    score,
   };
 }
 
-// ========== 端到端耗时评分 ==========
-
-/** 耗时阈值（ms） */
-const TOTAL_THRESHOLDS: Record<DurationGrade, number> = {
-  excellent: 60_000,
-  good: 120_000,
-  pass: 180_000,
-  fail: Infinity,
-};
-
-const INTENT_THRESHOLDS: Record<DurationGrade, number> = {
-  excellent: 10_000,
-  good: 20_000,
-  pass: 30_000,
-  fail: Infinity,
-};
-
-function gradeDuration(ms: number, thresholds: Record<DurationGrade, number>): DurationGrade {
-  if (ms <= thresholds.excellent) return 'excellent';
-  if (ms <= thresholds.good) return 'good';
-  if (ms <= thresholds.pass) return 'pass';
-  return 'fail';
-}
-
-function gradeToScore(grade: DurationGrade): number {
-  switch (grade) {
-    case 'excellent': return 100;
-    case 'good': return 75;
-    case 'pass': return 50;
-    case 'fail': return 0;
-  }
-}
+// ========== 阶段耗时记录 ==========
 
 /**
- * 评估端到端耗时
+ * 计算阶段耗时
  */
-export function scoreDuration(
+export function computeDuration(
   startTs: number,
   firstToolCallTs: number | null,
   doneTs: number | null,
-  compileDoneTs: number | null,
-): DurationScore {
-  const totalMs = (doneTs ?? Date.now()) - startTs;
+  pageGenResultTs: number | null,
+): DurationBreakdown {
+  const endTs = pageGenResultTs ?? doneTs ?? Date.now();
+  const totalMs = endTs - startTs;
   const intentMs = firstToolCallTs ? firstToolCallTs - startTs : totalMs;
-  const toolMs = firstToolCallTs && doneTs ? doneTs - firstToolCallTs : 0;
-  const compileMs = compileDoneTs && doneTs ? compileDoneTs - doneTs : null;
+  const toolMs = firstToolCallTs ? endTs - firstToolCallTs : 0;
 
-  const totalGrade = gradeDuration(totalMs, TOTAL_THRESHOLDS);
-  const intentGrade = gradeDuration(intentMs, INTENT_THRESHOLDS);
-
-  // 总分 = 70% 总耗时 + 30% 意图耗时
-  const score = Math.round(gradeToScore(totalGrade) * 0.7 + gradeToScore(intentGrade) * 0.3);
-
-  return {
-    totalMs,
-    intentMs,
-    toolMs,
-    compileMs,
-    totalGrade,
-    intentGrade,
-    score,
-  };
+  return { totalMs, intentMs, toolMs, compileMs: null };
 }
 
-// ========== 综合评分 ==========
+// ========== 综合分析 ==========
 
 /**
- * 对单个测试用例综合评分
+ * 对单个测试用例做综合分析
  */
-export async function scoreCase(
+export async function analyzeCase(
   testCase: TestCase,
   runResult: RunResult,
   codeRoot: string,
 ): Promise<CaseResult> {
-  const { events, timedOut, error, firstToolCallTs, doneTs } = runResult;
+  const { events, timedOut, error, firstToolCallTs, doneTs, pageGenResultTs } = runResult;
   const startTs = events.length > 0 ? events[0].timestamp : Date.now();
 
-  // 意图识别评分
-  const intent = scoreIntent(testCase, events);
+  // 意图识别链路分析
+  const intent = analyzeIntent(testCase, events);
 
-  // 页面质量评分（仅页面生成类）
+  // 页面质量检测（仅页面生成类）
   let quality: CaseResult['quality'] = null;
   let codeQuality: CaseResult['codeQuality'] = null;
   if (testCase.expectedIntent === 'page_generation' && !timedOut) {
@@ -232,7 +158,6 @@ export async function scoreCase(
     const toolResults = events.filter(e => e.event.type === 'tool_result');
     const pageGenResult = toolResults.find(e => {
       try {
-        // tool_result 可能以 __SKYWALKER_SUBAGENT_TASK_COMPLETE__ 开头，跳过找 JSON
         const tr = e.event.tool_result ?? '';
         const jsonStart = tr.indexOf('{');
         if (jsonStart < 0) return false;
@@ -248,23 +173,17 @@ export async function scoreCase(
       quality = qualityResult;
       codeQuality = qualityResult.codeQuality;
     } else {
-      quality = {
-        compilePassed: false,
-        runtimeOk: null,
-        componentsMatched: false,
-        failedComponents: [],
-        installCompleted: false,
-        fileCompleteness: 0,
-        missingFiles: REQUIRED_PAGE_FILES_LIST,
-        score: 0,
-      };
+      // 没找到 generate_page 的 tool_result，从磁盘检查
+      const diskResult = await checkPageQualityFromDisk(codeRoot, testCase.expectedComponents);
+      quality = diskResult;
+      codeQuality = null;
     }
   }
 
-  // 端到端耗时评分
+  // 阶段耗时
   let duration: CaseResult['duration'] = null;
   if (!timedOut) {
-    duration = scoreDuration(startTs, firstToolCallTs, doneTs, null);
+    duration = computeDuration(startTs, firstToolCallTs, doneTs, pageGenResultTs);
   }
 
   return {
@@ -286,27 +205,12 @@ export function generateReport(results: CaseResult[]): EvalReport {
   const pageGenResults = results.filter(r => r.testCase.expectedIntent === 'page_generation');
   const nonPageResults = results.filter(r => r.testCase.expectedIntent !== 'page_generation');
 
-  const avgIntentScore = results.length > 0
-    ? Math.round(results.reduce((sum, r) => sum + r.intent.score, 0) / results.length)
-    : 0;
-
-  const avgQualityScore = pageGenResults.length > 0 && pageGenResults.every(r => r.quality !== null)
-    ? Math.round(pageGenResults.reduce((sum, r) => sum + (r.quality?.score ?? 0), 0) / pageGenResults.length)
-    : 0;
-
-  const avgCodeQualityScore = pageGenResults.length > 0 && pageGenResults.some(r => r.codeQuality !== null)
-    ? Math.round(pageGenResults.reduce((sum, r) => sum + (r.codeQuality?.score ?? 0), 0) / pageGenResults.filter(r => r.codeQuality !== null).length)
-    : 0;
-
   const avgTotalMs = pageGenResults.length > 0 && pageGenResults.every(r => r.duration !== null)
     ? Math.round(pageGenResults.reduce((sum, r) => sum + (r.duration?.totalMs ?? 0), 0) / pageGenResults.length)
     : 0;
 
-  // 总体耗时等级
-  let overallDurationGrade: DurationGrade = 'fail';
-  if (avgTotalMs <= TOTAL_THRESHOLDS.excellent) overallDurationGrade = 'excellent';
-  else if (avgTotalMs <= TOTAL_THRESHOLDS.good) overallDurationGrade = 'good';
-  else if (avgTotalMs <= TOTAL_THRESHOLDS.pass) overallDurationGrade = 'pass';
+  const intentCorrectCount = results.filter(r => r.intent.routedCorrectly).length;
+  const toolCorrectCount = results.filter(r => r.intent.toolSelectedCorrectly).length;
 
   return {
     timestamp: new Date().toISOString(),
@@ -314,16 +218,13 @@ export function generateReport(results: CaseResult[]): EvalReport {
     pageGenCases: pageGenResults.length,
     nonPageCases: nonPageResults.length,
     results,
-    avgIntentScore,
-    avgQualityScore,
-    avgCodeQualityScore,
     avgTotalMs,
-    overallDurationGrade,
+    intentCorrectCount,
+    toolCorrectCount,
   };
 }
 
 // ========== 工具函数 ==========
-
 
 const REQUIRED_PAGE_FILES_LIST = [
   'index.tsx',
@@ -332,3 +233,93 @@ const REQUIRED_PAGE_FILES_LIST = [
   'page-component-props.ts',
   'page-stage.css',
 ];
+
+/**
+ * 从磁盘检查页面质量（当 generate_page tool_result 找不到时的兜底）
+ * 不依赖 tool_result，直接扫描文件系统 + preview server 编译检查
+ */
+async function checkPageQualityFromDisk(
+  codeRoot: string,
+  expectedComponents: string[],
+): Promise<import('./types.js').QualityResult> {
+  const { existsSync, readdirSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { resolveCodeRoot, setPreviewProject, waitForCompile } = await import('./preview-checker.js');
+
+  const codeDir = resolveCodeRoot(codeRoot, {
+    pagePath: null,
+    pageDir: null,
+    installCompleted: false,
+    components: [],
+    codeRoot: null,
+  });
+
+  // 依赖检查
+  // 如果没有 node_modules，尝试 pnpm install
+  let hasNm = existsSync(join(codeDir, 'node_modules'));
+  let hasDidi = existsSync(join(codeDir, 'node_modules', '@didi'));
+  if (!hasNm && existsSync(join(codeDir, 'package.json'))) {
+    console.log(`  📦 补装依赖...`);
+    try {
+      const { execSync } = await import('node:child_process');
+      execSync('pnpm install --no-frozen-lockfile --ignore-scripts --ignore-workspace', {
+        cwd: codeDir,
+        timeout: 180_000,
+        stdio: 'pipe',
+      });
+      hasNm = existsSync(join(codeDir, 'node_modules'));
+      hasDidi = existsSync(join(codeDir, 'node_modules', '@didi'));
+    } catch (e) {
+      console.log(`  ⚠️ 补装依赖失败: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+  const installCompleted = hasNm && hasDidi;
+
+  // 检查 src/pages 下有没有生成的页面
+  const pagesDir = join(codeDir, 'src', 'pages');
+  let pageDirs: string[] = [];
+  try {
+    pageDirs = readdirSync(pagesDir, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .map(d => d.name);
+  } catch { /* pages 目录不存在 */ }
+
+  const hasPages = pageDirs.length > 0;
+
+  // 文件完整性
+  const missingFiles: string[] = [];
+  if (hasPages) {
+    const firstPageDir = join(pagesDir, pageDirs[0]);
+    for (const file of REQUIRED_PAGE_FILES_LIST) {
+      if (!existsSync(join(firstPageDir, file))) {
+        missingFiles.push(file);
+      }
+    }
+  }
+
+  // 编译检查：绑定 preview server，查看编译错误
+  let compilePassed: boolean | null = null;
+  if (hasPages) {
+    const previewBound = await setPreviewProject(codeDir);
+    if (previewBound) {
+      const pageId = pageDirs[0];
+      const errors = await waitForCompile(pageId);
+      compilePassed = !errors[pageId];
+    } else {
+      compilePassed = false;
+    }
+  } else {
+    compilePassed = null;
+  }
+
+  return {
+    compilePassed,
+    runtimeOk: null,
+    componentsMatched: false,
+    failedComponents: [],
+    matchedComponents: [],
+    missingComponents: expectedComponents,
+    installCompleted,
+    missingFiles: hasPages ? missingFiles : REQUIRED_PAGE_FILES_LIST,
+  };
+}

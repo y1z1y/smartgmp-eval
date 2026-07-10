@@ -1,14 +1,14 @@
 /**
  * 预览检查器 — 调 smartgmp-preview API 检查页面质量
  *
- * 5 个评分维度（总分100）：
- *  1. 预览可访问      40分  — 页面真的能在浏览器打开
- *  2. 编译无错误      15分  — Vite 编译层面无语法/类型错误
- *  3. 组件匹配准确率   25分  — AI 选的组件是不是用户要的
- *  4. 组件匹配无报错   10分  — 匹配过程有没有组件找不着
- *  5. 依赖安装成功    10分  — pnpm install 是否成功
+ * 不打分，只检测事实：
+ *  1. 预览是否可访问
+ *  2. 编译是否有错误
+ *  3. 组件匹配了哪些、缺了哪些
+ *  4. 依赖安装是否成功
+ *  5. 代码质量问题（静态分析）
  */
-import type { PreviewPagesResponse, PageCompileError, QualityScore } from './types.js';
+import type { PreviewPagesResponse, PageCompileError, QualityResult } from './types.js';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { checkCodeQuality } from './code-quality.js';
@@ -81,7 +81,7 @@ export async function waitForCompile(
 }
 
 /**
- * 检查页面预览是否可访问 — fetch 页面 URL 检查 HTTP 200
+ * 检查页面预览是否可访问
  */
 export async function checkPreviewAccessible(pageId: string): Promise<boolean> {
   try {
@@ -125,46 +125,43 @@ export function extractPageInfoFromToolResult(toolResult: string): {
 }
 
 /**
- * 解析真实的项目根目录
- * 从 pageDir 绝对路径反推：pageDir = projectRoot/src/pages/<slug> 或 projectRoot/code/src/pages/<slug>
+ * 解析代码目录（node_modules 所在的目录）
+ * SkyWalker 项目布局：projectRoot/code/ 才是放代码和依赖的地方
  */
-export function resolveProjectRoot(baseCodeRoot: string, info: ReturnType<typeof extractPageInfoFromToolResult>): string {
-  // 优先从 pageDir 反推（最准确，是 new_generate_page 实际写入的路径）
+export function resolveCodeRoot(baseCodeRoot: string, info: ReturnType<typeof extractPageInfoFromToolResult>): string {
+  // 优先从 pageDir 反推
   if (info.pageDir) {
-    // pageDir 格式: /xxx/project/src/pages/cycling-cashback
-    // 或: /xxx/project/code/src/pages/cycling-cashback
     const pagesIndex = info.pageDir.indexOf('/src/pages/');
     if (pagesIndex > 0) {
-      // /src/pages/ 前面就是项目根
       return info.pageDir.slice(0, pagesIndex);
     }
-    // 也可能是 /code/src/pages/
     const codePagesIndex = info.pageDir.indexOf('/code/src/pages/');
     if (codePagesIndex > 0) {
-      // /code/src/pages/ 前面的 /code 算项目根（SkyWalker 的 code 布局）
       return info.pageDir.slice(0, codePagesIndex + 5); // 包含 /code
     }
   }
 
-  // 其次用 tool_result 返回的 codeRoot
+  // 从 codeRoot 推断
   if (info.codeRoot) {
-    if (existsSync(join(info.codeRoot, 'src', 'pages'))) return info.codeRoot;
-    if (existsSync(join(info.codeRoot, 'code', 'src', 'pages'))) return join(info.codeRoot, 'code');
+    if (existsSync(join(info.codeRoot, 'node_modules'))) return info.codeRoot;
+    if (existsSync(join(info.codeRoot, 'code', 'node_modules'))) return join(info.codeRoot, 'code');
   }
 
-  // 最后兜底用 baseCodeRoot
-  if (existsSync(join(baseCodeRoot, 'src', 'pages'))) return baseCodeRoot;
-  if (existsSync(join(baseCodeRoot, 'code', 'src', 'pages'))) return join(baseCodeRoot, 'code');
+  // 兜底：baseCodeRoot 下的 code/ 子目录
+  if (existsSync(join(baseCodeRoot, 'code', 'node_modules'))) return join(baseCodeRoot, 'code');
+  if (existsSync(join(baseCodeRoot, 'node_modules'))) return baseCodeRoot;
+  // 最后兜底：code/ 子目录存在就用它
+  if (existsSync(join(baseCodeRoot, 'code'))) return join(baseCodeRoot, 'code');
   return baseCodeRoot;
 }
 
 /**
- * 检查组件匹配准确率（匹配到的组件是否包含用户期望的组件）
+ * 检查组件匹配情况
  */
 export function checkComponentAccuracy(
   matchedComponents: Array<{ id: string; dirName?: string; error?: string }>,
   expectedComponents: string[],
-): { accuracy: number; matchedExpected: string[]; missingExpected: string[] } {
+): { matchedExpected: string[]; missingExpected: string[] } {
   const matchedIds = matchedComponents
     .filter(c => !c.error)
     .map(c => (c.id ?? c.dirName ?? '').toLowerCase());
@@ -181,104 +178,81 @@ export function checkComponentAccuracy(
     }
   }
 
-  const accuracy = expectedComponents.length > 0
-    ? matchedExpected.length / expectedComponents.length
-    : 1;
-  return { accuracy, matchedExpected, missingExpected };
+  return { matchedExpected, missingExpected };
 }
 
 /**
- * 综合检查页面质量
- *
- * 评分维度（总分100）：
- *  1. 预览可访问      40分  — 页面真的能在浏览器打开
- *  2. 编译无错误      15分  — Vite 编译层面无语法/类型错误
- *  3. 组件匹配准确率   25分  — AI 选的组件是不是用户要的
- *  4. 组件匹配无报错   10分  — 匹配过程有没有组件找不着
- *  5. 依赖安装成功    10分  — pnpm install 是否成功
+ * 综合检查页面质量（不打分，只记录检测结果）
  */
 export async function checkPageQuality(
   codeRoot: string,
   toolResult: string,
   expectedComponents: string[],
-): Promise<QualityScore & { codeQuality: import('./types.js').CodeQualityScore }> {
+): Promise<QualityResult & { codeQuality: import('./types.js').CodeQualityAnalysis }> {
   const info = extractPageInfoFromToolResult(toolResult);
-  const projectRoot = resolveProjectRoot(codeRoot, info);
-
-  console.log(`  [quality] 项目根目录: ${projectRoot}`);
-  console.log(`  [quality] pagePath=${info.pagePath}, pageDir=${info.pageDir}, installCompleted=${info.installCompleted}, components=${info.components.length}个`);
+  const codeDir = resolveCodeRoot(codeRoot, info);
 
   const pageId = info.pagePath ? info.pagePath.replace(/^\/pages\//, '') : null;
 
-  // 1. 预览可访问（40分）
-  // 先绑定项目到 preview server，绑定失败说明项目不完整（没 node_modules 等）
+  // 1. 预览可访问
   let previewBound = false;
   let previewAccessible = false;
-  if (pageId && projectRoot) {
-    previewBound = await setPreviewProject(projectRoot);
+  if (pageId && codeDir) {
+    previewBound = await setPreviewProject(codeDir);
     if (previewBound) {
       previewAccessible = await checkPreviewAccessible(pageId);
     }
   }
-  if (!previewBound) {
-    console.log(`  [quality] 预览可访问: ❌ +0 (preview server 绑定项目失败，可能缺少 node_modules)`);
-  } else {
-    console.log(`  [quality] 预览可访问: ${previewAccessible ? '✅ +40' : '❌ +0'}`);
-  }
 
-  // 2. 编译无错误（15分）
-  // 只在项目成功绑定到 preview server 时才检查，否则查的是旧项目的缓存
+  // 2. 编译检查
   let compilePassed = false;
   if (pageId && previewBound) {
     const errors = await waitForCompile(pageId);
     compilePassed = !errors[pageId];
-    console.log(`  [quality] 编译无错误: ${compilePassed ? '✅ +15' : '❌ +0'}`);
-  } else {
-    console.log(`  [quality] 编译无错误: ❌ +0 (项目未绑定 preview server，无法检查)`);
   }
 
-  // 3. 组件匹配准确率（25分）
+  // 3. 组件匹配
   const compAccuracy = checkComponentAccuracy(info.components, expectedComponents);
-  const accuracyScore = Math.round(compAccuracy.accuracy * 25);
-  console.log(`  [quality] 组件准确率: ${Math.round(compAccuracy.accuracy * 100)}% +${accuracyScore} (匹配: ${compAccuracy.matchedExpected.join(',') || '无'}, 缺失: ${compAccuracy.missingExpected.join(',') || '无'})`);
 
-  // 4. 组件匹配无报错（10分）
+  // 4. 组件报错
   const failedComponents = info.components
     .filter(c => c.error)
     .map(c => c.id);
   const componentsMatched = failedComponents.length === 0 && info.components.length > 0;
-  console.log(`  [quality] 组件无报错: ${componentsMatched ? '✅ +10' : '❌ +0'} (失败: ${failedComponents.join(',') || '无'})`);
 
-  // 5. 依赖安装成功（10分）
-  // 不看 tool_result.installCompleted（pnpm 在 smartgmp-mcp 进程里装不上 @didi 内网包）
-  // 直接检查磁盘：node_modules 存在 + @didi 包存在 = 依赖安装成功
-  const hasNm = existsSync(join(projectRoot, 'node_modules'));
-  const hasDidi = existsSync(join(projectRoot, 'node_modules', '@didi'));
+  // 5. 依赖安装
+  // 如果没有 node_modules，尝试 pnpm install（new_generate_page 可能没装依赖）
+  let hasNm = existsSync(join(codeDir, 'node_modules'));
+  let hasDidi = existsSync(join(codeDir, 'node_modules', '@didi'));
+  if (!hasNm && existsSync(join(codeDir, 'package.json'))) {
+    console.log(`  📦 补装依赖...`);
+    try {
+      const { execSync } = await import('node:child_process');
+      execSync('pnpm install --no-frozen-lockfile --ignore-scripts --ignore-workspace', {
+        cwd: codeDir,
+        timeout: 180_000,
+        stdio: 'pipe',
+      });
+      hasNm = existsSync(join(codeDir, 'node_modules'));
+      hasDidi = existsSync(join(codeDir, 'node_modules', '@didi'));
+    } catch (e) {
+      console.log(`  ⚠️ 补装依赖失败: ${e instanceof Error ? e.message : e}`);
+    }
+  }
   const installCompleted = hasNm && hasDidi;
-  console.log(`  [quality] 依赖安装: ${installCompleted ? '✅ +10' : '❌ +0'} (node_modules=${hasNm}, @didi=${hasDidi})`);
 
-  // 计算总分
-  let score = 0;
-  if (previewAccessible) score += 40;
-  if (compilePassed) score += 15;
-  score += accuracyScore;
-  if (componentsMatched) score += 10;
-  if (installCompleted) score += 10;
-
-  console.log(`  [quality] 总分: ${score}/100`);
-
-  // 6. 代码质量静态分析（50分，独立维度）
-  const codeQuality = checkCodeQuality(projectRoot, info.pageDir);
+  // 6. 代码质量静态分析
+  const codeQuality = checkCodeQuality(codeDir, info.pageDir);
 
   return {
     compilePassed,
     runtimeOk: null,
     componentsMatched,
     failedComponents,
+    matchedComponents: compAccuracy.matchedExpected,
+    missingComponents: compAccuracy.missingExpected,
     installCompleted,
-    fileCompleteness: compAccuracy.accuracy, // 复用：准确率即"匹配完整度"
-    missingFiles: compAccuracy.missingExpected, // 复用：缺失的期望组件
-    score,
+    missingFiles: compAccuracy.missingExpected,
     codeQuality,
   };
 }

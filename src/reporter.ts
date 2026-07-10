@@ -1,17 +1,10 @@
 /**
- * 报告生成器 — 终端表格 + JSON 报告文件
+ * 报告生成器 — 终端输出 + JSON 报告文件
  */
-import type { CaseResult, EvalReport, DurationGrade } from './types.js';
+import type { CaseResult, EvalReport } from './types.js';
+import type { StageTiming } from './runner.js';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
-
-/** 耗时等级中文映射 */
-const GRADE_LABEL: Record<DurationGrade, string> = {
-  excellent: '优秀',
-  good: '良好',
-  pass: '及格',
-  fail: '不及格',
-};
 
 /** 格式化毫秒为可读字符串 */
 function fmtMs(ms: number): string {
@@ -19,47 +12,54 @@ function fmtMs(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-/** 百分比格式 */
-function fmtPct(score: number): string {
-  return `${score}%`;
-}
+/** 简化工具名：mcp__smartgmp__new_generate_page → new_generate_page */
+const shortTool = (t: string) => t.replace(/^mcp__\w+__/, '');
 
 /**
  * 在终端输出评测报告
  */
-export function printReport(report: EvalReport): void {
+export function printReport(report: EvalReport, allStages: StageTiming[][]): void {
   console.log('');
   console.log('╔══════════════════════════════════════════════════════════════╗');
-  console.log('║            SkyWalker 页面生成评测报告                        ║');
+  console.log('║            SkyWalker 评测报告                                ║');
   console.log('╠══════════════════════════════════════════════════════════════╣');
-  console.log(`║ 评测时间: ${report.timestamp.padEnd(49)}║`);
-  console.log(`║ 测试用例: ${report.totalCases} 个（页面生成 ${report.pageGenCases} / 非页面 ${report.nonPageCases}）${''.padEnd(20)}║`);
-  console.log('╠══════════════════════════════════════════════════════════════╣');
-  console.log('║                                                              ║');
 
-  // 表头
-  const header = '║  用例       │ 意图识别 │ 页面质量 │ 代码质量 │ 端到端耗时   │ 总体   ║';
-  console.log(header);
-  console.log('║  ───────────┼──────────┼──────────┼──────────┼──────────────┼──────── ║');
+  for (let i = 0; i < report.results.length; i++) {
+    const r = report.results[i];
+    const name = r.testCase.name;
+    const routeIcon = r.intent.routedCorrectly ? '✅' : '❌';
+    const agents = r.intent.actualAgents.length > 0
+      ? [...new Set(r.intent.actualAgents)].join(' → ')
+      : '无';
 
-  for (const r of report.results) {
-    const name = r.testCase.name.padEnd(8).slice(0, 8);
-    const intent = r.timedOut ? '  超时  ' : fmtPct(r.intent.score).padStart(6) + '  ';
-    const quality = r.quality === null ? '  N/A   ' : fmtPct(r.quality.score).padStart(6) + '  ';
-    const codeQ = r.codeQuality === null ? '  N/A   ' : `${r.codeQuality.score}/50`.padStart(6) + '  ';
-    const duration = r.duration === null
-      ? '    N/A     '
-      : `${GRADE_LABEL[r.duration.totalGrade]} ${fmtMs(r.duration.totalMs)}`.padStart(10) + '  ';
-    const overall = r.timedOut ? '  0%  ' : calcOverall(r).padStart(4) + '  ';
+    // 阶段耗时（补全未关闭的阶段）
+    const stages = allStages[i] ?? [];
+    const fixedStages = stages.map((s, idx) => {
+      if (s.endTs <= s.startTs && idx < stages.length - 1) {
+        return { ...s, endTs: stages[idx + 1].startTs };
+      }
+      return s;
+    });
+    const stageLine = fixedStages.length > 0
+      ? fixedStages.map(s => {
+          const dur = s.endTs > s.startTs ? fmtMs(s.endTs - s.startTs) : '...';
+          return `${s.name} ${dur}`;
+        }).join(' → ')
+      : '';
+    const durLine = r.duration ? `总计 ${fmtMs(r.duration.totalMs)}` : '';
 
-    console.log(`║  ${name}│${intent}│${quality}│${codeQ}│${duration}│${overall}║`);
+    console.log(`║                                                              ║`);
+    console.log(`║  ${name}${''.padEnd(55 - name.length)}║`);
+    console.log(`║    ${routeIcon} ${agents}${''.padEnd(Math.max(0, 54 - agents.length - 4))}║`);
+    if (stageLine) console.log(`║    ${stageLine}${''.padEnd(Math.max(0, 54 - stageLine.length))}║`);
+    if (durLine) console.log(`║    ${durLine}${''.padEnd(Math.max(0, 54 - durLine.length))}║`);
   }
 
-  console.log('║                                                              ║');
+  console.log(`║                                                              ║`);
   console.log('╠══════════════════════════════════════════════════════════════╣');
 
-  const summary = `║ 汇总: 意图识别 ${fmtPct(report.avgIntentScore)} | 页面质量 ${fmtPct(report.avgQualityScore)} | 代码质量 ${report.avgCodeQualityScore}/50 | 端到端 ${GRADE_LABEL[report.overallDurationGrade]}`;
-  console.log(summary.padEnd(63) + '║');
+  const summary = `路由正确 ${report.intentCorrectCount}/${report.totalCases} | 工具正确 ${report.toolCorrectCount}/${report.totalCases} | 平均耗时 ${fmtMs(report.avgTotalMs)}`;
+  console.log(`║ ${summary}${''.padEnd(Math.max(0, 61 - summary.length))}║`);
 
   console.log('╚══════════════════════════════════════════════════════════════╝');
   console.log('');
@@ -74,29 +74,42 @@ export async function saveJsonReport(report: EvalReport, outputDir: string): Pro
   const filepath = join(outputDir, filename);
 
   // 精简版：去掉完整事件时间线，只保留关键信息
-  const slimResults = report.results.map(r => ({
-    id: r.testCase.id,
-    name: r.testCase.name,
-    prompt: r.testCase.prompt,
-    intent: r.intent,
-    quality: r.quality,
-    codeQuality: r.codeQuality,
-    duration: r.duration
-      ? {
-          totalMs: r.duration.totalMs,
-          intentMs: r.duration.intentMs,
-          toolMs: r.duration.toolMs,
-          totalGrade: r.duration.totalGrade,
-          score: r.duration.score,
-        }
-      : null,
-    timedOut: r.timedOut,
-    error: r.error,
-    eventCount: r.events.length,
-    toolCalls: r.events
-      .filter(e => e.event.type === 'tool_call')
-      .map(e => ({ tool: e.event.tool_name, agent: e.event.agent, ts: e.timestamp })),
-  }));
+  const slimResults = report.results.map(r => {
+    // 按 agent 分组统计工具
+    const agentToolMap = new Map<string, Map<string, number>>();
+    for (const te of r.events) {
+      if (te.event.type !== 'tool_call') continue;
+      const agent = te.event.agent ?? '?';
+      const tool = te.event.tool_name ?? '';
+      if (tool.startsWith('sessions_spawn')) continue;
+      if (!agentToolMap.has(agent)) agentToolMap.set(agent, new Map());
+      const tools = agentToolMap.get(agent)!;
+      tools.set(tool, (tools.get(tool) ?? 0) + 1);
+    }
+    const agentTools = [...agentToolMap].map(([agent, tools]) => ({
+      agent,
+      tools: [...tools].map(([t, c]) => ({ name: shortTool(t), count: c })),
+    }));
+
+    return {
+      id: r.testCase.id,
+      name: r.testCase.name,
+      prompt: r.testCase.prompt,
+      routedAgents: [...new Set(r.intent.actualAgents)],
+      agentTools,
+      duration: r.duration
+        ? {
+            totalMs: r.duration.totalMs,
+            intentMs: r.duration.intentMs,
+            toolMs: r.duration.toolMs,
+          }
+        : null,
+      quality: r.quality,
+      codeQuality: r.codeQuality,
+      timedOut: r.timedOut,
+      error: r.error,
+    };
+  });
 
   const slimReport = {
     ...report,
@@ -105,19 +118,4 @@ export async function saveJsonReport(report: EvalReport, outputDir: string): Pro
 
   await writeFile(filepath, JSON.stringify(slimReport, null, 2), 'utf-8');
   return filepath;
-}
-
-/** 计算单用例总体分 */
-function calcOverall(r: CaseResult): string {
-  if (r.timedOut) return '0';
-  const weights: number[] = [];
-  const scores: number[] = [];
-
-  weights.push(0.3); scores.push(r.intent.score);
-  if (r.quality !== null) { weights.push(0.5); scores.push(r.quality.score); }
-  if (r.duration !== null) { weights.push(0.2); scores.push(r.duration.score); }
-
-  const totalWeight = weights.reduce((a, b) => a + b, 0);
-  const weightedSum = weights.reduce((sum, w, i) => sum + w * scores[i], 0);
-  return String(Math.round(weightedSum / totalWeight));
 }
